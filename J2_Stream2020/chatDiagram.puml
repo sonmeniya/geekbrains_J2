@@ -1,0 +1,148 @@
+@startuml
+class network.ServerSocketThread {
+- int port
+- int timeout
+- ServerSocketThreadListener listener
++ void run()
+}
+class ru.chat.server.core.SqlClient {
+- {static} Connection connection
+- {static} Statement statement
+~ {static} void connect()
+~ {static} void disconnect()
+~ {static} String getNickname(String,String)
+}
+interface network.ServerSocketThreadListener {
+~ void onServerStart(ServerSocketThread)
+~ void onServerStop(ServerSocketThread)
+~ void onServerSockedCreated(ServerSocketThread,ServerSocket)
+~ void onServerTimeout(ServerSocketThread,ServerSocket)
+~ void onSocketAccepted(ServerSocketThread,ServerSocket,Socket)
+~ void onServerException(ServerSocketThread,Throwable)
+}
+class ru.chat.client.ClientGUI {
+- {static} int WINDOW_WIDTH
+- {static} int WINDOW_HEIGHT
+- JTextArea log
+- JPanel panelTop
+- JTextField tfIPAddress
+- JTextField tfPort
+- JCheckBox cbAlwaysOnTop
+- JTextField tfLogin
+- JPasswordField tfPassword
+- JButton btnLogin
+- JPanel panelBottom
+- JButton btnDisconnect
+- JTextField tfMessage
+- JButton btnSend
+- JList<String> userList
+- boolean shownException
+- SocketThread socketThread
++ {static} void main(String[])
++ void actionPerformed(ActionEvent)
+- void connect()
+- void sendMessage()
+- void wrtMsgToLogFile(String,String)
+- void putLog(String)
++ void showException(Thread,Throwable)
++ void uncaughtException(Thread,Throwable)
++ void onSocketStart(SocketThread,Socket)
++ void onSocketStop(SocketThread)
++ void onSocketReady(SocketThread,Socket)
++ void onReceiveString(SocketThread,Socket,String)
++ void onSocketException(SocketThread,Exception)
+}
+interface ru.chat.server.core.ChatServerListener {
+~ void onChatServerMessage(String)
+}
+class ru.chat.server.core.ClientThread {
+- String nickname
+- boolean isAuthorized
++ String getNickname()
++ boolean isAuthorized()
+~ void authAccept(String)
+~ void authFail()
+~ void msgFormatError(String)
+}
+class ru.chat.server.core.ChatServer {
+- ServerSocketThread server
+- DateFormat DATE_FORMAT
+- Vector<SocketThread> clients
+- ChatServerListener listener
++ void start(int)
++ void stop()
+- void putLog(String)
++ void onServerStart(ServerSocketThread)
++ void onServerStop(ServerSocketThread)
++ void onServerSockedCreated(ServerSocketThread,ServerSocket)
++ void onServerTimeout(ServerSocketThread,ServerSocket)
++ void onSocketAccepted(ServerSocketThread,ServerSocket,Socket)
++ void onServerException(ServerSocketThread,Throwable)
++ void onSocketStart(SocketThread,Socket)
++ void onSocketStop(SocketThread)
++ void onSocketReady(SocketThread,Socket)
++ void onReceiveString(SocketThread,Socket,String)
+- void handleNonAuthMessage(ClientThread,String)
+- void handleAuthMessage(ClientThread,String)
+- void sendToAllAuthorizedClients(String)
++ void onSocketException(SocketThread,Exception)
+}
+interface network.SocketThreadListener {
+~ void onSocketStart(SocketThread,Socket)
+~ void onSocketStop(SocketThread)
+~ void onSocketReady(SocketThread,Socket)
+~ void onReceiveString(SocketThread,Socket,String)
+~ void onSocketException(SocketThread,Exception)
+}
+class ru.chat.server.gui.ServerGUI {
+- {static} int POS_X
+- {static} int POS_Y
+- {static} int WINDOW_WIDTH
+- {static} int WINDOW_HEIGHT
+- ChatServer chatServer
+- JButton btnStart
+- JButton btnStop
+- JPanel panelTop
+- JTextArea log
++ {static} void main(String[])
++ void actionPerformed(ActionEvent)
++ void uncaughtException(Thread,Throwable)
++ void onChatServerMessage(String)
+}
+class ru.chat.common.Common {
++ {static} String DELIMITER
++ {static} String AUTH_REQUEST
++ {static} String AUTH_ACCEPT
++ {static} String AUTH_DENIED
++ {static} String MSG_FORMAT_ERROR
++ {static} String TYPE_BROADCAST
++ {static} String getAuthRequest(String,String)
++ {static} String getAuthAccept(String)
++ {static} String getAuthDenied()
++ {static} String getMsgFormatError(String)
++ {static} String getTypeBroadcast(String,String)
+}
+class network.SocketThread {
+- SocketThreadListener listener
+- Socket socket
+- DataOutputStream out
++ void run()
++ boolean sendMessage(String)
++ void close()
+}
+
+
+network.Thread <|-- network.ServerSocketThread
+java.awt.event.ActionListener <|.. ru.chat.client.ClientGUI
+ru.chat.client.UncaughtExceptionHandler <|.. ru.chat.client.ClientGUI
+network.SocketThreadListener <|.. ru.chat.client.ClientGUI
+ru.chat.client.JFrame <|-- ru.chat.client.ClientGUI
+network.SocketThread <|-- ru.chat.server.core.ClientThread
+network.ServerSocketThreadListener <|.. ru.chat.server.core.ChatServer
+network.SocketThreadListener <|.. ru.chat.server.core.ChatServer
+java.awt.event.ActionListener <|.. ru.chat.server.gui.ServerGUI
+ru.chat.server.gui.UncaughtExceptionHandler <|.. ru.chat.server.gui.ServerGUI
+ru.chat.server.core.ChatServerListener <|.. ru.chat.server.gui.ServerGUI
+ru.chat.server.gui.JFrame <|-- ru.chat.server.gui.ServerGUI
+network.Thread <|-- network.SocketThread
+@enduml
